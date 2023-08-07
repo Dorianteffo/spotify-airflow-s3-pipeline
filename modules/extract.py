@@ -94,28 +94,25 @@ def get_all_tracks(token,artist):
     artist_name = []
     artist_id = []
     while len(album_name)<=total_rows : 
-        result_track = get_track(token,limit,offset,artist)
-        all_artist_name = []
-        all_artist_id = []
-        for i, track in enumerate(result_track) : 
-            album_name.append(track['album']['name'])
-            album_id.append(track['album']['id'])
-            duration_ms.append(track['duration_ms'])
-            explicit.append(track['explicit'])
-            track_name.append(track['name'])
-            track_popularity.append(track['popularity'])
-            track_number.append(track['track_number'])
-            available_markets.append(track['available_markets'])
-            for j in range(len(result_track[i]['artists'])) : 
-                all_artist_name.append(result_track[i]['artists'][j]['name'])
-                all_artist_id.append(result_track[i]['artists'][j]['id'])
+        track = get_track(token,limit,offset,artist)
+        for i in range(len(track)) : 
+            album_name.append(track[i]['album']['name'])
+            album_id.append(track[i]['album']['id'])
+            duration_ms.append(track[i]['duration_ms'])
+            explicit.append(track[i]['explicit'])
+            track_name.append(track[i]['name'])
+            track_popularity.append(track[i]['popularity'])
+            track_number.append(track[i]['track_number'])
+            available_markets.append(track[i]['available_markets'])
+            all_artist_name = [arti['name'] for arti in track[i]['artists']]
+            all_artist_id = [arti['id'] for arti in track[i]['artists']]
             artist_name.append(all_artist_name)
             artist_id.append(all_artist_id)
-            tracks_data = {'track_name':track_name, 'duration_ms':duration_ms, 'explicit':explicit,'popularity':track_popularity, 'track_number':track_number,
-                           'available_markets':available_markets,'artists_name': artist_name, 'artists_id':artist_id, 'album_id':album_id, 'album_name':album_name}
         offset += limit
-        if len(result_track) < limit :
+        if len(track) < limit :
             break
+    tracks_data = {'track_name':track_name, 'duration_ms':duration_ms, 'explicit':explicit,'popularity':track_popularity, 'track_number':track_number,
+                           'available_markets':available_markets,'artists_name': artist_name, 'artists_id':artist_id, 'album_id':album_id, 'album_name':album_name}
     return tracks_data
 
 
