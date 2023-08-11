@@ -33,41 +33,6 @@ def get_token() :
 def get_auth_header(token) :
     return {"Authorization" : "Bearer " + token}
 
-
-def get_artist(token,limit,offset): 
-    url = "https://api.spotify.com/v1/search"
-    headers = get_auth_header(token)
-    query=f"?q=year:2023&type=artist&limit={limit}&offset={offset}"
-
-    query_url = url + query 
-    result = get(query_url,headers=headers)
-    json_result = json.loads(result.content)['artists']['items']
-    return json_result 
-
-def get_all_artist(token):
-    limit = 50
-    offset = 0 
-    total_rows = 1000
-    all_artist = []
-    all_followers = []
-    all_id = []
-    all_genre = []
-    all_popularity = []
-    while len(all_artist)<=total_rows : 
-        result_artist = get_artist(token,limit,offset)
-        for i, artists in enumerate(result_artist) : 
-            all_artist.append(artists['name'])
-            all_followers.append(artists['followers']['total'])
-            all_id.append(artists['id'])
-            all_genre.append(artists['genres'])
-            all_popularity.append(artists['popularity'])
-        offset += limit
-        if len(result_artist) < limit :
-            break
-    artist_data = {"artists_id":all_id,"artist_name":all_artist, "artist_followers": all_followers, "artists_popularity": all_popularity, "artists_genre": all_genre}
-    return artist_data
-
-
 def get_track(token,limit,offset,artist) : 
     url = "https://api.spotify.com/v1/search"
     headers = get_auth_header(token)
@@ -82,7 +47,7 @@ def get_track(token,limit,offset,artist) :
 def get_all_tracks(token,artist):
     limit = 50
     offset = 0 
-    total_rows = 500
+    total_rows = 900
     album_name = []
     album_id = []
     duration_ms = []
@@ -111,8 +76,9 @@ def get_all_tracks(token,artist):
         offset += limit
         if len(track) < limit :
             break
-    tracks_data = {'track_name':track_name, 'duration_ms':duration_ms, 'explicit':explicit,'popularity':track_popularity, 'track_number':track_number,
-                           'available_markets':available_markets,'artists_name': artist_name, 'artists_id':artist_id, 'album_id':album_id, 'album_name':album_name}
+    tracks_data = {'track_name':track_name, 'duration_ms':duration_ms, 'explicit':explicit,'popularity':track_popularity,
+                    'track_number':track_number,'available_markets':available_markets,
+                    'artists_name': artist_name, 'artists_id':artist_id, 'album_id':album_id, 'album_name':album_name}
     return tracks_data
 
 
@@ -126,6 +92,12 @@ def get_album(token,limit,offset,artist) :
     json_result = json.loads(result.content)['albums']['items']
     return json_result
 
+def get_album_info(token, id): 
+    url = f"https://api.spotify.com/v1/albums/{id}"
+    headers = get_auth_header(token)
+    result = get(url, headers=headers)
+    json_result = json.loads(result.content)
+    return json_result
 
 def get_all_album(token,artist) : 
     limit = 50 
@@ -137,17 +109,30 @@ def get_all_album(token,artist) :
     date = []
     available_markets = []
     total_tracks = []
+    artist_name = []
+    artist_id = []
+    popularity = []
+    label = []
     while len(id)<=total_rows : 
-        result_album = get_album(token,limit,offset,artist)
-        for i, album in enumerate(result_album) : 
-            id.append(album['id'])
-            name.append(album['name'])
-            type.append(album['album_type'])
-            date.append(album['release_date'])
-            available_markets.append(album['available_markets'])
-            total_tracks.append(album['total_tracks'])
-            albums_data = {"id": id , 'name': name, 'type': type, 'release_date':date, 'available_markets':available_markets, 'total_tracks':total_tracks}
+        album = get_album(token,limit,offset,artist)
+        for i in range(len((album))): 
+            id.append(album[i]['id'])
+            name.append(album[i]['name'])
+            type.append(album[i]['album_type'])
+            date.append(album[i]['release_date'])
+            available_markets.append(album[i]['available_markets'])
+            total_tracks.append(album[i]['total_tracks'])
+            all_artist_name = [arti['name'] for arti in album[i]['artists']]
+            all_artist_id = [arti['id'] for arti in album[i]['artists']]
+            artist_name.append(all_artist_name)
+            artist_id.append(all_artist_id)
+            popularity.append(get_album_info(token,album[i]['id'])['popularity'])
+            label.append(get_album_info(token,album[i]['id'])['label'])
         offset += limit 
-        if len(result_album) < limit :
+        if len(album) < limit :
             break
+    albums_data = {"id": id , 'name': name, 'type': type, 'release_date':date,
+                    'available_markets':available_markets, 'total_tracks':total_tracks, 
+                    "label":label, "popularity" : popularity,
+                    "artist_name": artist_name, "artist_id": artist_id}
     return albums_data
