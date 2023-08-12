@@ -1,8 +1,15 @@
 import pandas as pd
-import extract 
+import modules.modules as modules  
+import s3fs
 
 def etl_track(): 
-    df = extract.tracks_data()
+    #extract track data from the api
+    token =modules.get_token()
+    df = modules.get_all_tracks(token, 'Lil Baby')
+    df = pd.DataFrame(df)
+
+    #data cleaning 
+
     #delete unnecessary column 
     df = df.drop(['Unnamed: 0'], axis=1)
 
@@ -19,8 +26,14 @@ def etl_track():
 
     df.to_csv('s3://dorian-spotify-api/tracks_data')
 
+
 def etl_album(): 
-    df = extract.album_data()
+    #extract album data from the api
+    token = modules.get_token()
+    df = modules.get_all_album(token, "Lil Baby")
+    df = pd.DataFrame(df)
+
+    # data cleaning 
 
     #delete unnecessary column
     df = df.drop('Unnamed: 0', axis=1)
