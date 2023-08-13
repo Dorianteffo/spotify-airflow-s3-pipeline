@@ -10,9 +10,6 @@ def etl_track():
 
     #data cleaning 
 
-    #delete unnecessary column 
-    df = df.drop(['Unnamed: 0'], axis=1)
-
     #convert explicit column to bool
     df['explicit'] = df['explicit'].replace({"0.0": False,"1.0": True, 0.0 : "False", 1.0 : "True"})
     df['explicit'] = df['explicit'].astype('bool')
@@ -34,10 +31,7 @@ def etl_album():
     df = pd.DataFrame(df)
 
     # data cleaning 
-
-    #delete unnecessary column
-    df = df.drop('Unnamed: 0', axis=1)
-
+    
     #convert the release_date to datetime 
     df['release_date'] = pd.to_datetime(df['release_date'])
     
